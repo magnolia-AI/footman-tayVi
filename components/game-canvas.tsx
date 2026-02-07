@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { EntityManager, Entity, PositionComponent, SpriteComponent, FactionComponent, SpawnerComponent, MovementSystem } from '@/lib/game-engine/core';
+import { EntityManager, Entity, PositionComponent, SpriteComponent, FactionComponent, SpawnerComponent, VelocityComponent } from '@/lib/game-engine/core';
 import { SpawnerSystem } from '@/lib/game-engine/systems/spawner-system';
 import { UnitAISystem } from '@/lib/game-engine/systems/unit-ai-system';
+import { RTSMovementSystem, MoveStatsComponent } from '@/lib/game-engine/systems/movement';
+import { CollisionSystem, CircleColliderComponent } from '@/lib/game-engine/systems/collision';
+import { SelectableComponent } from '@/lib/game-engine/components/selection';
+import { useRTSControls } from '@/hooks/use-rts-controls';
 
 /**
  * RenderSystem handles drawing entities to the canvas based on their components.
@@ -11,7 +15,7 @@ import { UnitAISystem } from '@/lib/game-engine/systems/unit-ai-system';
 class RenderSystem {
   constructor(private ctx: CanvasRenderingContext2D) {}
 
-  draw(entities: Entity[]) {
+  draw(entities: Entity[], isDragging: boolean, dragStart: {x: number, y: number}, currentMouse: {x: number, y: number}) {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
@@ -21,12 +25,23 @@ class RenderSystem {
       const sprite = entity.getComponent<SpriteComponent>('sprite');
 
       if (pos && sprite) {
+        const selectable = entity.getComponent<SelectableComponent>('selectable');
+        
         if (sprite.assetId.includes('base')) {
            this.ctx.fillStyle = sprite.assetId.includes('blue') ? '#1e40af' : '#991b1b';
         } else {
            this.ctx.fillStyle = entity.getComponent<FactionComponent>('faction')?.id === 'player' ? '#3b82f6' : '#ef4444';
         }
         
+        // Draw selection circle
+        if (selectable?.isSelected) {
+          this.ctx.strokeStyle = '#00ff00';
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.arc(pos.x, pos.y, (sprite.width / 2) + 4, 0, Math.PI * 2);
+          this.ctx.stroke();
+        }
+
         this.ctx.fillRect(
           pos.x - sprite.width / 2,
           pos.y - sprite.height / 2,
@@ -49,6 +64,26 @@ class RenderSystem {
         }
       }
     }
+
+    // Draw selection box
+    if (isDragging) {
+      this.ctx.strokeStyle = '#00ff00';
+      this.ctx.setLineDash([5, 5]);
+      this.ctx.strokeRect(
+        dragStart.x,
+        dragStart.y,
+        currentMouse.x - dragStart.x,
+        currentMouse.y - dragStart.y
+      );
+      this.ctx.setLineDash([]);
+      this.ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+      this.ctx.fillRect(
+        dragStart.x,
+        dragStart.y,
+        currentMouse.x - dragStart.x,
+        currentMouse.y - dragStart.y
+      );
+    }
   }
 }
 
@@ -57,6 +92,13 @@ export const GameCanvas: React.FC = () => {
   const entityManagerRef = useRef<EntityManager | null>(null);
   const requestRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
+  const mousePosRef = useRef({ x: 0, y: 0 });
+
+  // Hook for RTS controls
+  // Use a state for entityManager to trigger re-renders if necessary, 
+  // though we mostly use it via ref for the loop
+  const [emState, setEmState] = React.useState<EntityManager | null>(null);
+  const { isDragging, dragStart } = useRTSControls(emState, canvasRef);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -69,8 +111,10 @@ export const GameCanvas: React.FC = () => {
     const em = new EntityManager();
     em.addSystem(new SpawnerSystem(em));
     em.addSystem(new UnitAISystem());
-    em.addSystem(new MovementSystem());
+    em.addSystem(new RTSMovementSystem());
+    em.addSystem(new CollisionSystem());
     entityManagerRef.current = em;
+    setEmState(em);
 
     // Add a basic RenderSystem (we handle this inside the loop for canvas context binding)
     const renderSystem = new RenderSystem(ctx);

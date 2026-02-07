@@ -17,7 +17,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **3. Develop Footmen Spawner and Simple AI Systems** <!-- id:tXwt2F -->
   Create 'lib/game-engine/systems/spawner-system.ts' to auto-generate units and a 'UnitAISystem' for basic movement towards the map center.
 
-- [ ] **4. Implement RTS Interaction & Input Handling** <!-- id:u5K6_j -->
+- [x] **4. Implement RTS Interaction & Input Handling** <!-- id:u5K6_j -->
   Create hooks for mouse events to handle hero selection and right-click movement. Implement basic collision detection and a movement system.
 
 - [ ] **5. Define Hero Ability & Combat Logic** <!-- id:QAH3sl -->
