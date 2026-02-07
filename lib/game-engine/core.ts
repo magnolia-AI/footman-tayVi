@@ -189,4 +189,16 @@ export class UnitAIComponent extends Component {
   }
 }
 
+export class ManaComponent extends Component {
+  readonly type = 'mana';
+  constructor(
+    public current: number = 100,
+    public max: number = 100,
+    public regeneration: number = 1.0
+  ) {
+    super();
+  }
+}
+
+
 

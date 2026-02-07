@@ -20,7 +20,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **4. Implement RTS Interaction & Input Handling** <!-- id:u5K6_j -->
   Create hooks for mouse events to handle hero selection and right-click movement. Implement basic collision detection and a movement system.
 
-- [ ] **5. Define Hero Ability & Combat Logic** <!-- id:QAH3sl -->
+- [x] **5. Define Hero Ability & Combat Logic** <!-- id:QAH3sl -->
   Create 'lib/game-engine/systems/combat-system.ts' for health reduction and XP logic. Implement a data-driven ability system for hero skills like 'Avalanche'.
 
 - [ ] **6. Build React HUD and Inventory UI** <!-- id:l0SBcO -->
