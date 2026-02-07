@@ -85,7 +85,8 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
       const level = selected.getComponent<LevelComponent>('level');
       const inv = selected.getComponent<InventoryComponent>('inventory');
 
-      setState({
+      setState(prev => ({
+        ...prev,
         selectedEntity: {
           id: selected.id,
           health: health ? { current: health.current, max: health.max } : undefined,
@@ -93,9 +94,9 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
           level: level ? { level: level.level, exp: level.experience, next: level.experienceToNext } : undefined,
           inventory: inv ? [...inv.slots] : undefined,
         }
-      });
+      }));
     } else {
-      if (state.selectedEntity) setState({ selectedEntity: null });
+      if (state.selectedEntity) setState(prev => ({ ...prev, selectedEntity: null }));
     }
   };
 

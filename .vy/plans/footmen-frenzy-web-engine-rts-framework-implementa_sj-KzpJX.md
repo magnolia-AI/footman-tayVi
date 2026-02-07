@@ -35,7 +35,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **9. Implement Match Results and XP Persistence** <!-- id:CLPZAx -->
   Create server actions to save match outcomes and build 'app/match/[id]/page.tsx' to display game summaries.
 
-- [ ] **10. Final Integration and Hero Selection Lobby** <!-- id:hXaPno -->
+- [x] **10. Final Integration and Hero Selection Lobby** <!-- id:hXaPno -->
   Refactor 'app/page.tsx' to feature a Hero Selection screen (Draft/AR) before initializing the 'GameCanvas' for the match.
 
 ---
