@@ -6,9 +6,52 @@ import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Trophy, Skull } from 'lucide-react';
 export const GameHUD: React.FC = () => {
   const { state } = useGameState();
+  const router = useRouter();
   const hero = state.selectedEntity;
+
+  if (state.isGameOver) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-md z-50 animate-in fade-in duration-500">
+        <Card className="max-w-md w-full p-8 text-center space-y-6 border-slate-700 bg-slate-900 shadow-2xl">
+          <div className="flex justify-center flex-col items-center gap-4">
+            <div className={cn(
+               "p-6 rounded-full",
+               state.victory ? "bg-yellow-100 text-yellow-600" : "bg-slate-200 text-slate-600"
+            )}>
+              {state.victory ? <Trophy size={64} /> : <Skull size={64} />}
+            </div>
+            <h2 className="text-4xl font-extrabold tracking-tighter uppercase italic italic">
+              {state.victory ? "Victory" : "Defeat"}
+            </h2>
+          </div>
+          
+          <p className="text-slate-400">
+            {state.victory 
+              ? "The enemy base has been destroyed! You have stood your ground and claimed victory in the arena."
+              : "Your base has fallen. Regroup and prepare for the next battle, Footman."}
+          </p>
+
+          <Button 
+            className="w-full py-8 text-xl font-black uppercase tracking-widest" 
+            onClick={() => {
+              if (state.matchId) {
+                router.push(`/match/${state.matchId}`);
+              } else {
+                router.push('/');
+              }
+            }}
+          >
+            Match Summary
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   if (!hero) return null;
 
@@ -87,4 +130,3 @@ export const GameHUD: React.FC = () => {
     </div>
   );
 };
-

@@ -32,7 +32,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **8. Configure Database Schema for Persistence** <!-- id:Uagxlj -->
   Update 'lib/schema.ts' to include 'matches', 'player_stats', and 'hero_unlocks' tables referencing 'neonAuthUser'.
 
-- [ ] **9. Implement Match Results and XP Persistence** <!-- id:CLPZAx -->
+- [x] **9. Implement Match Results and XP Persistence** <!-- id:CLPZAx -->
   Create server actions to save match outcomes and build 'app/match/[id]/page.tsx' to display game summaries.
 
 - [ ] **10. Final Integration and Hero Selection Lobby** <!-- id:hXaPno -->

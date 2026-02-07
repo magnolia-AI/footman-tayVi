@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { EntityManager, Entity, HealthComponent, ManaComponent } from '@/lib/game-engine/core';
 import { LevelComponent, InventoryComponent, InventoryItem } from '@/lib/game-engine/components/hero';
 
+import { saveMatchResult } from '@/app/actions/match';
+
 interface GameState {
   selectedEntity: {
     id: string;
@@ -12,20 +14,66 @@ interface GameState {
     level?: { level: number; exp: number; next: number };
     inventory?: (InventoryItem | null)[];
   } | null;
+  isGameOver: boolean;
+  victory?: boolean;
+  matchId?: number;
 }
 
 const GameStateContext = createContext<{
   state: GameState;
   updateFromEngine: (em: EntityManager) => void;
+  gameOver: (victory: boolean, matchData: any) => Promise<void>;
 } | null>(null);
 
 export function GameStateProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<GameState>({ selectedEntity: null });
+  const [state, setState] = useState<GameState>({ 
+    selectedEntity: null,
+    isGameOver: false 
+  });
+
+  const gameOver = async (victory: boolean, stats: any) => {
+    if (state.isGameOver) return;
+
+    try {
+      const result = await saveMatchResult({
+        victory,
+        durationSeconds: stats.duration || 0,
+        kills: stats.kills || 0,
+        deaths: stats.deaths || 0,
+        goldEarned: stats.gold || 0,
+        xpGained: victory ? 500 : 150,
+      });
+
+      setState(prev => ({ 
+        ...prev, 
+        isGameOver: true, 
+        victory,
+        matchId: result.matchId 
+      }));
+    } catch (error) {
+      console.error('Failed to save match result:', error);
+      setState(prev => ({ ...prev, isGameOver: true, victory }));
+    }
+  };
 
   const updateFromEngine = (em: EntityManager) => {
-    // In a real RTS, we'd find the selected units. 
-    // For now, let's find the 'player-hero' or just the first selected unit
+    // If game is over, we check for bases
     const allEntities = Array.from((em as any).entities.values()) as Entity[];
+    
+    // Check win/loss condition if not already over
+    if (!state.isGameOver) {
+      const playerBase = allEntities.find(e => e.id === 'player-base');
+      const enemyBase = allEntities.find(e => e.id === 'enemy-base');
+
+      if (!playerBase) {
+        gameOver(false, { duration: 120 }); // Mock stats for now
+        return;
+      }
+      if (!enemyBase) {
+        gameOver(true, { duration: 120 });
+        return;
+      }
+    }
     const selected = allEntities.find(e => {
         const selectable = e.getComponent<any>('selectable');
         return selectable?.isSelected;
@@ -52,7 +100,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <GameStateContext.Provider value={{ state, updateFromEngine }}>
+    <GameStateContext.Provider value={{ state, updateFromEngine, gameOver }}>
       {children}
     </GameStateContext.Provider>
   );
@@ -63,4 +111,3 @@ export function useGameState() {
   if (!context) throw new Error('useGameState must be used within GameStateProvider');
   return context;
 }
-
