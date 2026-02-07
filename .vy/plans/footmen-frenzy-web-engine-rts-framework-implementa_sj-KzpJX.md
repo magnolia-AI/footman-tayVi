@@ -11,7 +11,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **1. Initialize Core ECS Framework in 'lib/game-engine'** <!-- id:tmahRW -->
   Create 'lib/game-engine/core.ts' with Entity, Component, and System base classes. Define initial components: Position, Velocity, Health, Faction, and Sprite.
 
-- [ ] **2. Implement HTML5 Canvas Renderer Component** <!-- id:vzzmwD -->
+- [x] **2. Implement HTML5 Canvas Renderer Component** <!-- id:vzzmwD -->
   Create 'components/game-canvas.tsx'. Set up the main loop using requestAnimationFrame and a 'RenderSystem' to draw entities from the ECS onto the canvas.
 
 - [ ] **3. Develop Footmen Spawner and Simple AI Systems** <!-- id:tXwt2F -->
