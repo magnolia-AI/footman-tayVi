@@ -68,7 +68,7 @@ export abstract class System {
  * Entity Manager to handle entity lifecycle and system updates.
  */
 export class EntityManager {
-  private entities: Map<EntityId, Entity> = new Map();
+  public entities: Map<EntityId, Entity> = new Map();
   private systems: System[] = [];
 
   addEntity(entity: Entity): void {
@@ -200,5 +200,21 @@ export class ManaComponent extends Component {
   }
 }
 
+export class GoldComponent extends Component {
+  readonly type = 'gold';
+  constructor(public amount: number = 0) {
+    super();
+  }
+}
 
+export class AuraComponent extends Component {
+  readonly type = 'aura';
+  constructor(
+    public auraType: 'immolation' | 'command',
+    public radius: number,
+    public effectValue: number
+  ) {
+    super();
+  }
+}
 

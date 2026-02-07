@@ -26,7 +26,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **6. Build React HUD and Inventory UI** <!-- id:l0SBcO -->
   Use Radix UI components to construct a bottom-bar HUD for Hero stats (Level, HP, Mana) and a 6-slot inventory. Sync with ECS via 'hooks/use-game-state.tsx'.
 
-- [ ] **7. Create Item Shop and Gold Economy** <!-- id:hZkN-c -->
+- [x] **7. Create Item Shop and Gold Economy** <!-- id:hZkN-c -->
   Implement 'components/shop-dialog.tsx'. Add logic for gold generation from kills and purchasing items that grant component-based buffs (e.g., Immolation Aura).
 
 - [ ] **8. Configure Database Schema for Persistence** <!-- id:Uagxlj -->
