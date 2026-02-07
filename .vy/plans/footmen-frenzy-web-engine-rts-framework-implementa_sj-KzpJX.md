@@ -23,7 +23,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **5. Define Hero Ability & Combat Logic** <!-- id:QAH3sl -->
   Create 'lib/game-engine/systems/combat-system.ts' for health reduction and XP logic. Implement a data-driven ability system for hero skills like 'Avalanche'.
 
-- [ ] **6. Build React HUD and Inventory UI** <!-- id:l0SBcO -->
+- [x] **6. Build React HUD and Inventory UI** <!-- id:l0SBcO -->
   Use Radix UI components to construct a bottom-bar HUD for Hero stats (Level, HP, Mana) and a 6-slot inventory. Sync with ECS via 'hooks/use-game-state.tsx'.
 
 - [ ] **7. Create Item Shop and Gold Economy** <!-- id:hZkN-c -->

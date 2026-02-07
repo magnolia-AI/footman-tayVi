@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { EntityManager, Entity, PositionComponent, SpriteComponent, FactionComponent, SpawnerComponent, VelocityComponent } from '@/lib/game-engine/core';
+import { EntityManager, Entity, PositionComponent, SpriteComponent, FactionComponent, SpawnerComponent, VelocityComponent, HealthComponent, ManaComponent } from '@/lib/game-engine/core';
 import { SpawnerSystem } from '@/lib/game-engine/systems/spawner-system';
 import { UnitAISystem } from '@/lib/game-engine/systems/unit-ai-system';
 import { RTSMovementSystem, MoveStatsComponent } from '@/lib/game-engine/systems/movement';
 import { CollisionSystem, CircleColliderComponent } from '@/lib/game-engine/systems/collision';
 import { SelectableComponent } from '@/lib/game-engine/components/selection';
+import { LevelComponent, InventoryComponent } from '@/lib/game-engine/components/hero';
 import { useRTSControls } from '@/hooks/use-rts-controls';
+import { useGameState } from '@/hooks/use-game-state';
 
 /**
  * RenderSystem handles drawing entities to the canvas based on their components.
@@ -98,7 +100,8 @@ export const GameCanvas: React.FC = () => {
   // Use a state for entityManager to trigger re-renders if necessary, 
   // though we mostly use it via ref for the loop
   const [emState, setEmState] = React.useState<EntityManager | null>(null);
-  const { isDragging, dragStart } = useRTSControls(emState, canvasRef);
+  const { isDragging, dragStart, currentMouse } = useRTSControls(emState, canvasRef);
+  const { updateFromEngine } = useGameState();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -116,7 +119,7 @@ export const GameCanvas: React.FC = () => {
     entityManagerRef.current = em;
     setEmState(em);
 
-    // Add a basic RenderSystem (we handle this inside the loop for canvas context binding)
+    // Add a basic RenderSystem
     const renderSystem = new RenderSystem(ctx);
 
     // Initial Test Entities: Base Spawners
@@ -125,6 +128,17 @@ export const GameCanvas: React.FC = () => {
       .addComponent(new FactionComponent('player'))
       .addComponent(new SpawnerComponent(5, 0, 'footman'))
       .addComponent(new SpriteComponent('base-blue', 48, 48));
+
+    // Player Hero
+    const hero = new Entity('player-hero')
+      .addComponent(new PositionComponent(200, 300))
+      .addComponent(new FactionComponent('player'))
+      .addComponent(new SpriteComponent('hero-unit', 32, 32))
+      .addComponent(new HealthComponent(450, 500))
+      .addComponent(new ManaComponent(120, 200))
+      .addComponent(new LevelComponent(3, 40, 100))
+      .addComponent(new InventoryComponent())
+      .addComponent(new SelectableComponent());
     
     const enemyBase = new Entity('enemy-base')
       .addComponent(new PositionComponent(700, 300))
@@ -133,20 +147,18 @@ export const GameCanvas: React.FC = () => {
       .addComponent(new SpriteComponent('base-red', 48, 48));
 
     em.addEntity(playerBase);
+    em.addEntity(hero);
     em.addEntity(enemyBase);
 
     const animate = (time: number) => {
       if (lastTimeRef.current !== null) {
         const deltaTime = (time - lastTimeRef.current) / 1000;
         
-        // Update physics systems (if any)
         em.update(deltaTime);
+        updateFromEngine(em);
         
-        // Draw using our rendering logic
-        // Get entities from EntityManager - casting to access private entities for rendering if needed
-        // Or better, add a getter to EntityManager or just use the current internal state
         const allEntities = Array.from((em as any).entities.values()) as Entity[];
-        renderSystem.draw(allEntities);
+        renderSystem.draw(allEntities, isDragging, dragStart, currentMouse);
       }
       
       lastTimeRef.current = time;
