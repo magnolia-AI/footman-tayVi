@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { EntityManager, Entity, PositionComponent, SpriteComponent } from '@/lib/game-engine/core';
+import { EntityManager, Entity, PositionComponent, SpriteComponent, FactionComponent, SpawnerComponent, MovementSystem } from '@/lib/game-engine/core';
+import { SpawnerSystem } from '@/lib/game-engine/systems/spawner-system';
+import { UnitAISystem } from '@/lib/game-engine/systems/unit-ai-system';
 
 /**
  * RenderSystem handles drawing entities to the canvas based on their components.
@@ -19,7 +21,12 @@ class RenderSystem {
       const sprite = entity.getComponent<SpriteComponent>('sprite');
 
       if (pos && sprite) {
-        this.ctx.fillStyle = sprite.assetId === 'footman' ? '#3b82f6' : '#ef4444'; // Basic color coding for now
+        if (sprite.assetId.includes('base')) {
+           this.ctx.fillStyle = sprite.assetId.includes('blue') ? '#1e40af' : '#991b1b';
+        } else {
+           this.ctx.fillStyle = entity.getComponent<FactionComponent>('faction')?.id === 'player' ? '#3b82f6' : '#ef4444';
+        }
+        
         this.ctx.fillRect(
           pos.x - sprite.width / 2,
           pos.y - sprite.height / 2,
@@ -60,22 +67,29 @@ export const GameCanvas: React.FC = () => {
 
     // Initialize EntityManager and add some test entities
     const em = new EntityManager();
+    em.addSystem(new SpawnerSystem(em));
+    em.addSystem(new UnitAISystem());
+    em.addSystem(new MovementSystem());
     entityManagerRef.current = em;
 
     // Add a basic RenderSystem (we handle this inside the loop for canvas context binding)
     const renderSystem = new RenderSystem(ctx);
 
-    // Initial Test Entities
-    const player = new Entity('player-1')
-      .addComponent(new PositionComponent(400, 300))
-      .addComponent(new SpriteComponent('footman', 32, 32));
+    // Initial Test Entities: Base Spawners
+    const playerBase = new Entity('player-base')
+      .addComponent(new PositionComponent(100, 300))
+      .addComponent(new FactionComponent('player'))
+      .addComponent(new SpawnerComponent(5, 0, 'footman'))
+      .addComponent(new SpriteComponent('base-blue', 48, 48));
     
-    const enemy = new Entity('enemy-1')
-      .addComponent(new PositionComponent(500, 300))
-      .addComponent(new SpriteComponent('grunt', 32, 32));
+    const enemyBase = new Entity('enemy-base')
+      .addComponent(new PositionComponent(700, 300))
+      .addComponent(new FactionComponent('enemy'))
+      .addComponent(new SpawnerComponent(5, 0, 'footman'))
+      .addComponent(new SpriteComponent('base-red', 48, 48));
 
-    em.addEntity(player);
-    em.addEntity(enemy);
+    em.addEntity(playerBase);
+    em.addEntity(enemyBase);
 
     const animate = (time: number) => {
       if (lastTimeRef.current !== null) {
@@ -114,7 +128,7 @@ export const GameCanvas: React.FC = () => {
         className="border-4 border-slate-700 rounded-lg shadow-2xl bg-black cursor-crosshair"
       />
       <div className="absolute top-4 left-4 text-white font-mono text-xs bg-black/50 p-2 rounded">
-        Footmen Frenzy Engine v0.1 | Active Entities: 2
+        Footmen Frenzy Engine v0.1 | Active Entities: {Array.from((entityManagerRef.current as any)?.entities?.values() || []).length}
       </div>
     </div>
   );

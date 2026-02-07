@@ -100,6 +100,20 @@ export class EntityManager {
   }
 }
 
+export class MovementSystem extends System {
+  readonly requiredComponents = ['position', 'velocity'];
+
+  update(entities: Entity[], deltaTime: number): void {
+    for (const entity of entities) {
+      const pos = entity.getComponent<PositionComponent>('position')!;
+      const vel = entity.getComponent<VelocityComponent>('velocity')!;
+      pos.x += vel.vx * deltaTime;
+      pos.y += vel.vy * deltaTime;
+    }
+  }
+}
+
+
 /**
  * INITIAL COMPONENTS
  */
@@ -148,4 +162,31 @@ export class SpriteComponent extends Component {
     super();
   }
 }
+
+export class SpawnerComponent extends Component {
+  readonly type = 'spawner';
+  /**
+   * @param interval Time in seconds between spawns
+   * @param timer Cumulative time since last spawn
+   * @param unitType Type of unit to spawn (reference or string)
+   */
+  constructor(
+    public interval: number,
+    public timer: number = 0,
+    public unitType: string = 'footman'
+  ) {
+    super();
+  }
+}
+
+export class UnitAIComponent extends Component {
+  readonly type = 'unit-ai';
+  /**
+   * @param mode Current AI behavior mode
+   */
+  constructor(public mode: 'aggressive' | 'idle' = 'aggressive') {
+    super();
+  }
+}
+
 
