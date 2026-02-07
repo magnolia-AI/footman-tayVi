@@ -1,67 +1,55 @@
-import { pgTable, serial, varchar, text, timestamp, boolean, uuid } from 'drizzle-orm/pg-core';
-
-// Import neon_auth table for FK references (but don't re-export it!)
-// This is the key - Drizzle only generates migrations for EXPORTED tables
+import { pgTable, serial, varchar, text, timestamp, integer, uuid } from 'drizzle-orm/pg-core';
 import { neonAuthUser } from './neon-auth-schema';
 
 /**
- * YOUR APPLICATION TABLES
- * 
- * These tables are managed by Drizzle and live in the 'public' schema.
- * 
- * To reference neon_auth.user, use .references(() => neonAuthUser.id).
- * The neonAuthUser table is imported but NOT exported, so Drizzle won't
- * try to manage it in migrations.
- * 
- * Workflow:
- * 1. Define your tables here
- * 2. Run `bun run db:generate` to create migrations
- * 3. Run `bun run db:migrate` to apply migrations
+ * Footmen Frenzy Game Tables
  */
 
-// Example: User profile table that extends Neon Auth user data
-// export const userProfiles = pgTable('user_profiles', {
-//   id: serial('id').primaryKey(),
-//   // Reference the Neon Auth user - creates proper FK constraint
-//   userId: uuid('user_id')
-//     .notNull()
-//     .unique()
-//     .references(() => neonAuthUser.id, { onDelete: 'cascade' }),
-//   bio: text('bio'),
-//   username: varchar('username', { length: 50 }).unique(),
-//   avatarUrl: text('avatar_url'),
-//   createdAt: timestamp('created_at').defaultNow().notNull(),
-//   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-// });
+// Table for storing match results
+export const matches = pgTable('matches', {
+  id: serial('id').primaryKey(),
+  winnerId: uuid('winner_id')
+    .references(() => neonAuthUser.id, { onDelete: 'set null' }),
+  mapName: varchar('map_name', { length: 100 }).default('Footmen Frenzy Standard').notNull(),
+  durationSeconds: integer('duration_seconds'),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  endedAt: timestamp('ended_at'),
+});
 
-// Example: Posts table with author reference to Neon Auth user
-// export const posts = pgTable('posts', {
-//   id: serial('id').primaryKey(),
-//   title: varchar('title', { length: 255 }).notNull(),
-//   content: text('content'),
-//   published: boolean('published').default(false).notNull(),
-//   // Reference the Neon Auth user directly
-//   authorId: uuid('author_id')
-//     .notNull()
-//     .references(() => neonAuthUser.id, { onDelete: 'cascade' }),
-//   createdAt: timestamp('created_at').defaultNow().notNull(),
-//   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-// });
+// Table for persistent player statistics
+export const playerStats = pgTable('player_stats', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => neonAuthUser.id, { onDelete: 'cascade' }),
+  totalWins: integer('total_wins').default(0).notNull(),
+  totalLosses: integer('total_losses').default(0).notNull(),
+  totalKills: integer('total_kills').default(0).notNull(),
+  totalDeaths: integer('total_deaths').default(0).notNull(),
+  experiencePoints: integer('experience_points').default(0).notNull(),
+  goldEarned: integer('gold_earned').default(0).notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Table for tracking hero unlocks per player
+export const heroUnlocks = pgTable('hero_unlocks', {
+  id: serial('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => neonAuthUser.id, { onDelete: 'cascade' }),
+  heroId: varchar('hero_id', { length: 50 }).notNull(),
+  unlockedAt: timestamp('unlocked_at').defaultNow().notNull(),
+});
 
 // Type exports
-// export type UserProfile = typeof userProfiles.$inferSelect;
-// export type NewUserProfile = typeof userProfiles.$inferInsert;
-// export type Post = typeof posts.$inferSelect;
-// export type NewPost = typeof posts.$inferInsert;
+export type Match = typeof matches.$inferSelect;
+export type NewMatch = typeof matches.$inferInsert;
 
-/**
- * Re-export neon auth TYPES only (not tables!) for convenience.
- * 
- * For querying neon_auth tables with Drizzle, import tables from './neon-auth-schema':
- * 
- *   import { neonAuthUser } from './neon-auth-schema';
- *   const user = await db.select().from(neonAuthUser).where(eq(neonAuthUser.id, id));
- */
+export type PlayerStats = typeof playerStats.$inferSelect;
+export type NewPlayerStats = typeof playerStats.$inferInsert;
+
+export type HeroUnlock = typeof heroUnlocks.$inferSelect;
+export type NewHeroUnlock = typeof heroUnlocks.$inferInsert;
+
 export type {
   NeonAuthUser,
   NeonAuthSession,
@@ -71,3 +59,4 @@ export type {
   NeonAuthMember,
   NeonAuthInvitation,
 } from './neon-auth-schema';
+

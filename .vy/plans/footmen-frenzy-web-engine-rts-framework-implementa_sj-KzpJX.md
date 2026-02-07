@@ -29,7 +29,7 @@ The core of the game will reside in a custom ECS engine built in TypeScript to h
 - [x] **7. Create Item Shop and Gold Economy** <!-- id:hZkN-c -->
   Implement 'components/shop-dialog.tsx'. Add logic for gold generation from kills and purchasing items that grant component-based buffs (e.g., Immolation Aura).
 
-- [ ] **8. Configure Database Schema for Persistence** <!-- id:Uagxlj -->
+- [x] **8. Configure Database Schema for Persistence** <!-- id:Uagxlj -->
   Update 'lib/schema.ts' to include 'matches', 'player_stats', and 'hero_unlocks' tables referencing 'neonAuthUser'.
 
 - [ ] **9. Implement Match Results and XP Persistence** <!-- id:CLPZAx -->
