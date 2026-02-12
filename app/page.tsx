@@ -22,7 +22,7 @@ export default function Home() {
         {/* Header / HUD Top */}
         <header className="fixed top-0 left-0 right-0 z-10 border-b border-slate-800 bg-black/80 backdrop-blur-md p-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-white tracking-widest uppercase italic">Footmen Frenzyyy</h1>
+            <h1 className="text-xl font-bold text-white tracking-widest uppercase italic">Footmen Frenzyyy!</h1>
             <Badge variant="outline" className="border-blue-500 text-blue-400">v0.1-alpha</Badge>
           </div>
           {gameStarted && (
