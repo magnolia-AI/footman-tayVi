@@ -16,8 +16,8 @@ export const env = createEnv({
    * Server-side environment variables (not exposed to the browser)
    */
   server: {
-    DATABASE_URL: z.string().url().startsWith("postgres"),
-    NEON_AUTH_BASE_URL: z.string().url(),
+    DATABASE_URL: z.string().url().startsWith("postgres").optional(),
+    NEON_AUTH_BASE_URL: z.string().url().optional(),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   },
 
@@ -26,10 +26,7 @@ export const env = createEnv({
    * Must be prefixed with NEXT_PUBLIC_
    */
   client: {
-    // Required in production for SEO (sitemap, robots.txt)
-    NEXT_PUBLIC_APP_URL: process.env.NODE_ENV === 'production'
-      ? z.string().url()
-      : z.string().url().optional(),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   },
 
   /**
